@@ -5,17 +5,20 @@ async function loadStats() {
   
   const domains = Object.keys(clickData);
   let totalClicks = 0;
+  let totalAppearances = 0;
   let totalUseful = 0;
   let totalNotUseful = 0;
   
   domains.forEach(domain => {
     totalClicks += clickData[domain].clicks;
+    totalAppearances += clickData[domain].appearances || 0;
     totalUseful += clickData[domain].useful;
     totalNotUseful += clickData[domain].notUseful;
   });
   
   // Update summary stats
   document.getElementById('total-clicks').textContent = totalClicks;
+  document.getElementById('total-appearances').textContent = totalAppearances;
   document.getElementById('unique-domains').textContent = domains.length;
   document.getElementById('total-useful').textContent = totalUseful;
   document.getElementById('total-not-useful').textContent = totalNotUseful;
@@ -48,12 +51,20 @@ async function loadStats() {
       ? Math.round((stats.useful / (stats.useful + stats.notUseful)) * 100) 
       : 0;
     
+    const ctr = stats.appearances > 0
+      ? Math.round((stats.clicks / stats.appearances) * 100)
+      : 0;
+    
     item.innerHTML = `
       <div class="domain-name">${domain}</div>
       <div class="domain-stats">
         <div class="domain-stat">
+          <span class="domain-stat-value">${stats.appearances || 0}</span>
+          <span class="domain-stat-label">Appearances</span>
+        </div>
+        <div class="domain-stat">
           <span class="domain-stat-value">${stats.clicks}</span>
-          <span class="domain-stat-label">Clicks</span>
+          <span class="domain-stat-label">Clicks (${ctr}%)</span>
         </div>
         <div class="domain-stat useful">
           <span class="domain-stat-value">${stats.useful}</span>

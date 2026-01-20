@@ -12,6 +12,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   } else if (message.type === 'CLEAR_PENDING_FEEDBACK') {
     pendingFeedback = null;
+  } else if (message.type === 'SEARCH_RESULTS_SCANNED') {
+    handleSearchResultsScan(message.domains);
   }
 });
 
@@ -25,7 +27,9 @@ async function handleSearchClick(domain, url, tabId) {
       clicks: 0,
       useful: 0,
       notUseful: 0,
-      lastClicked: null
+      appearances: 0,
+      lastClicked: null,
+      lastSeen: null
     };
   }
   
@@ -78,4 +82,29 @@ async function handleFeedback(domain, useful) {
   }
   
   pendingFeedback = null;
+}
+
+async function handleSearchResultsScan(domains) {
+  const data = await chrome.storage.local.get(['clickData']);
+  const clickData = data.clickData || {};
+  
+  // Update appearance count for each domain
+  domains.forEach(domain => {
+    if (!clickData[domain]) {
+      clickData[domain] = {
+        clicks: 0,
+        useful: 0,
+        notUseful: 0,
+        appearances: 0,
+        lastClicked: null,
+        lastSeen: null
+      };
+    }
+    
+    clickData[domain].appearances++;
+    clickData[domain].lastSeen = new Date().toISOString();
+  });
+  
+  await chrome.storage.local.set({ clickData });
+  console.log('Updated appearance counts for', domains.length, 'domains');
 }
