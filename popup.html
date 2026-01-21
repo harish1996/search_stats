@@ -55,9 +55,9 @@
     }
     .domain-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      font-size: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      font-size: 11px;
     }
     .domain-stat {
       text-align: center;
@@ -122,11 +122,15 @@
       <span class="stat-value" id="unique-domains">0</span>
     </div>
     <div class="stat-item">
-      <span class="stat-label">Useful Results:</span>
+      <span class="stat-label">Relevance Votes:</span>
+      <span class="stat-value" id="total-relevance">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Useful (after click):</span>
       <span class="stat-value" id="total-useful">0</span>
     </div>
     <div class="stat-item">
-      <span class="stat-label">Not Useful Results:</span>
+      <span class="stat-label">Not Useful (after click):</span>
       <span class="stat-value" id="total-not-useful">0</span>
     </div>
   </div>

@@ -8,18 +8,21 @@ async function loadStats() {
   let totalAppearances = 0;
   let totalUseful = 0;
   let totalNotUseful = 0;
+  let totalRelevance = 0;
   
   domains.forEach(domain => {
     totalClicks += clickData[domain].clicks;
     totalAppearances += clickData[domain].appearances || 0;
     totalUseful += clickData[domain].useful;
     totalNotUseful += clickData[domain].notUseful;
+    totalRelevance += (clickData[domain].relevantVotes || 0) + (clickData[domain].notRelevantVotes || 0);
   });
   
   // Update summary stats
   document.getElementById('total-clicks').textContent = totalClicks;
   document.getElementById('total-appearances').textContent = totalAppearances;
   document.getElementById('unique-domains').textContent = domains.length;
+  document.getElementById('total-relevance').textContent = totalRelevance;
   document.getElementById('total-useful').textContent = totalUseful;
   document.getElementById('total-not-useful').textContent = totalNotUseful;
   
@@ -55,25 +58,35 @@ async function loadStats() {
       ? Math.round((stats.clicks / stats.appearances) * 100)
       : 0;
     
+    const relevantVotes = stats.relevantVotes || 0;
+    const notRelevantVotes = stats.notRelevantVotes || 0;
+    const totalRelevanceVotes = relevantVotes + notRelevantVotes;
+    const relevanceRate = totalRelevanceVotes > 0
+      ? Math.round((relevantVotes / totalRelevanceVotes) * 100)
+      : 0;
+    
     item.innerHTML = `
       <div class="domain-name">${domain}</div>
+      <div style="margin-bottom: 8px; font-size: 12px; color: #666;">
+        <strong>Appearances:</strong> ${stats.appearances || 0} | 
+        <strong>CTR:</strong> ${ctr}% (${stats.clicks} clicks)
+      </div>
       <div class="domain-stats">
-        <div class="domain-stat">
-          <span class="domain-stat-value">${stats.appearances || 0}</span>
-          <span class="domain-stat-label">Appearances</span>
+        <div class="domain-stat" style="background: #e3f2fd;">
+          <span class="domain-stat-value">${relevantVotes}</span>
+          <span class="domain-stat-label">👍 Relevant</span>
         </div>
-        <div class="domain-stat">
-          <span class="domain-stat-value">${stats.clicks}</span>
-          <span class="domain-stat-label">Clicks (${ctr}%)</span>
+        <div class="domain-stat" style="background: #ffebee;">
+          <span class="domain-stat-value">${notRelevantVotes}</span>
+          <span class="domain-stat-label">👎 Not Relevant</span>
         </div>
-        <div class="domain-stat useful">
-          <span class="domain-stat-value">${stats.useful}</span>
-          <span class="domain-stat-label">👍 Useful</span>
+        <div class="domain-stat" style="background: #f5f5f5;">
+          <span class="domain-stat-value">${totalRelevanceVotes > 0 ? relevanceRate + '%' : 'N/A'}</span>
+          <span class="domain-stat-label">Relevance Rate</span>
         </div>
-        <div class="domain-stat not-useful">
-          <span class="domain-stat-value">${stats.notUseful}</span>
-          <span class="domain-stat-label">👎 Not Useful</span>
-        </div>
+      </div>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; font-size: 11px; color: #999;">
+        After-click feedback: ${stats.useful} useful, ${stats.notUseful} not useful
       </div>
     `;
     

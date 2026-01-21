@@ -14,6 +14,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     pendingFeedback = null;
   } else if (message.type === 'SEARCH_RESULTS_SCANNED') {
     handleSearchResultsScan(message.domains);
+  } else if (message.type === 'RELEVANCE_VOTE') {
+    handleRelevanceVote(message.domain, message.url, message.relevant);
   }
 });
 
@@ -28,6 +30,8 @@ async function handleSearchClick(domain, url, tabId) {
       useful: 0,
       notUseful: 0,
       appearances: 0,
+      relevantVotes: 0,
+      notRelevantVotes: 0,
       lastClicked: null,
       lastSeen: null
     };
@@ -96,6 +100,8 @@ async function handleSearchResultsScan(domains) {
         useful: 0,
         notUseful: 0,
         appearances: 0,
+        relevantVotes: 0,
+        notRelevantVotes: 0,
         lastClicked: null,
         lastSeen: null
       };
@@ -107,4 +113,31 @@ async function handleSearchResultsScan(domains) {
   
   await chrome.storage.local.set({ clickData });
   console.log('Updated appearance counts for', domains.length, 'domains');
+}
+
+async function handleRelevanceVote(domain, url, relevant) {
+  const data = await chrome.storage.local.get(['clickData']);
+  const clickData = data.clickData || {};
+  
+  if (!clickData[domain]) {
+    clickData[domain] = {
+      clicks: 0,
+      useful: 0,
+      notUseful: 0,
+      appearances: 0,
+      relevantVotes: 0,
+      notRelevantVotes: 0,
+      lastClicked: null,
+      lastSeen: null
+    };
+  }
+  
+  if (relevant) {
+    clickData[domain].relevantVotes++;
+  } else {
+    clickData[domain].notRelevantVotes++;
+  }
+  
+  await chrome.storage.local.set({ clickData });
+  console.log('Relevance vote recorded for', domain, '- Relevant:', relevant);
 }
