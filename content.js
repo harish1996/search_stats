@@ -56,11 +56,11 @@
       const voteContainer = document.createElement('div');
       voteContainer.className = 'brave-tracker-vote-buttons';
       voteContainer.style.cssText = `
-        display: inline-flex;
+        display: flex;
         gap: 4px;
-        margin-left: 8px;
+        margin-top: 4px;
+        margin-bottom: 4px;
         align-items: center;
-        vertical-align: middle;
       `;
       
       // Create thumbs up button
@@ -114,11 +114,15 @@
       voteContainer.appendChild(thumbsUp);
       voteContainer.appendChild(thumbsDown);
       
-      // Insert after the title
-      titleElement.style.display = 'inline';
-      titleElement.parentElement.style.display = 'flex';
-      titleElement.parentElement.style.alignItems = 'center';
-      titleElement.parentElement.insertBefore(voteContainer, titleElement.nextSibling);
+      // Insert after the title's parent link element, not modifying the title itself
+      const linkElement = titleElement.parentElement;
+      if (linkElement && linkElement.tagName === 'A') {
+        // Insert after the link, within the result-content div
+        linkElement.parentElement.insertBefore(voteContainer, linkElement.nextSibling);
+      } else {
+        // Fallback: insert after title if structure is different
+        titleElement.parentElement.insertBefore(voteContainer, titleElement.nextSibling);
+      }
     });
   }
   
